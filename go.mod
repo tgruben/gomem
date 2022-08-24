@@ -16,4 +16,4 @@ module github.com/gomem/gomem
 
 go 1.14
 
-require github.com/apache/arrow/go/arrow v0.0.0-20200711183337-7b49cbc23f22
+require github.com/apache/arrow/go/v10 v10.0.0-20220824165920-25a273413539

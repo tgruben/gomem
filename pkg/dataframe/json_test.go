@@ -20,11 +20,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/apache/arrow/go/arrow"
-	"github.com/apache/arrow/go/arrow/array"
-	"github.com/apache/arrow/go/arrow/decimal128"
-	"github.com/apache/arrow/go/arrow/float16"
-	"github.com/apache/arrow/go/arrow/memory"
+	"github.com/apache/arrow/go/v10/arrow"
+	"github.com/apache/arrow/go/v10/arrow/array"
+	"github.com/apache/arrow/go/v10/arrow/decimal128"
+	"github.com/apache/arrow/go/v10/arrow/float16"
+	"github.com/apache/arrow/go/v10/arrow/memory"
 )
 
 const (
@@ -114,7 +114,6 @@ func TestToJSON(t *testing.T) {
 	defer rec1.Release()
 
 	df, err := NewDataFrameFromRecord(pool, rec1)
-
 	if err != nil {
 		t.Fatal(err)
 	}

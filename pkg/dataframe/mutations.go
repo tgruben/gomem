@@ -17,9 +17,9 @@ package dataframe
 import (
 	"fmt"
 
-	"github.com/apache/arrow/go/arrow"
-	"github.com/apache/arrow/go/arrow/array"
-	"github.com/apache/arrow/go/arrow/memory"
+	"github.com/apache/arrow/go/v10/arrow"
+	"github.com/apache/arrow/go/v10/arrow/array"
+	"github.com/apache/arrow/go/v10/arrow/memory"
 	"github.com/gomem/gomem/pkg/iterator"
 	"github.com/gomem/gomem/pkg/smartbuilder"
 )
@@ -66,10 +66,12 @@ func (m *Mutator) Slice(beg, end int64) MutationFunc {
 
 		dfCols := df.Columns()
 
-		cols := make([]array.Column, len(dfCols))
-		for i, col := range dfCols {
-			cols[i] = *col.NewSlice(beg, end)
-		}
+		cols := make([]arrow.Column, len(dfCols))
+		/*
+			for i, col := range dfCols {
+				cols[i] = *col.NewSlice(beg, end)
+			}
+		*/
 
 		defer func() {
 			for i := range cols {
@@ -194,8 +196,8 @@ type joinFuncConfig struct {
 	additionalLeftColsLen  int
 	additionalRightColsLen int
 	columnNames            []string
-	leftColumns            []array.Column
-	rightColumns           []array.Column
+	leftColumns            []arrow.Column
+	rightColumns           []arrow.Column
 	schema                 *arrow.Schema
 	recordBuilder          *array.RecordBuilder
 	smartBuilder           *smartbuilder.SmartBuilder
@@ -207,8 +209,8 @@ func (m *Mutator) newJoinFuncConfig(cfg *leftJoinConfig, leftDf *DataFrame, righ
 	jc := &joinFuncConfig{
 		mutator:      m,
 		columnNames:  columnNames,
-		leftColumns:  make([]array.Column, 0, leftDf.NumCols()),
-		rightColumns: make([]array.Column, 0, rightDf.NumCols()),
+		leftColumns:  make([]arrow.Column, 0, leftDf.NumCols()),
+		rightColumns: make([]arrow.Column, 0, rightDf.NumCols()),
 	}
 
 	// Start by making sure that both DataFrames have the columns we are looking for.

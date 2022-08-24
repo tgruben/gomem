@@ -14,7 +14,7 @@
 
 package metadata
 
-import "github.com/apache/arrow/go/arrow"
+import "github.com/apache/arrow/go/v10/arrow"
 
 const (
 	originalTypeKey = "GOMEM_DATAFRAME_ORIGINAL_TYPE"

@@ -15,8 +15,7 @@
 package dataframe
 
 import (
-	"github.com/apache/arrow/go/arrow"
-	"github.com/apache/arrow/go/arrow/array"
+	"github.com/apache/arrow/go/v10/arrow"
 )
 
 // I don't want to force the DataFrame API to conform to the TableReader API.
@@ -25,7 +24,7 @@ import (
 
 // TableFacade is a simple facade for a TableReader.
 type TableFacade interface {
-	array.Table
+	arrow.Table
 }
 
 type tableReaderFacade struct {
@@ -53,7 +52,7 @@ func (f *tableReaderFacade) NumCols() int64 {
 
 // Column is an immutable column data structure consisting of
 // a field (type metadata) and a chunked data array.
-func (f *tableReaderFacade) Column(i int) *array.Column {
+func (f *tableReaderFacade) Column(i int) *arrow.Column {
 	return f.df.ColumnAt(i)
 }
 

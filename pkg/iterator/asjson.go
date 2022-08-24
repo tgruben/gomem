@@ -15,8 +15,8 @@
 package iterator
 
 import (
-	"github.com/apache/arrow/go/arrow/decimal128"
-	"github.com/apache/arrow/go/arrow/float16"
+	"github.com/apache/arrow/go/v10/arrow/decimal128"
+	"github.com/apache/arrow/go/v10/arrow/float16"
 	"github.com/gomem/gomem/pkg/object"
 )
 
