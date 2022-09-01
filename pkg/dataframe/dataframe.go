@@ -15,17 +15,23 @@
 package dataframe
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 	"sync/atomic"
 
 	// import "github.com/apache/arrow/go/v10/arrow"
+	"github.com/mattetti/filebuffer"
 
 	"github.com/apache/arrow/go/v10/arrow"
 	"github.com/apache/arrow/go/v10/arrow/array"
+	"github.com/apache/arrow/go/v10/arrow/ipc"
 	"github.com/apache/arrow/go/v10/arrow/memory"
+	"github.com/apache/arrow/go/v10/parquet"
+	"github.com/apache/arrow/go/v10/parquet/pqarrow"
 	"github.com/gomem/gomem/internal/constructors"
 	"github.com/gomem/gomem/internal/debug"
 	"github.com/gomem/gomem/pkg/iterator"
@@ -519,6 +525,61 @@ func (df *DataFrame) validate() error {
 		if colLen < df.rows {
 			return fmt.Errorf("dataframe validate(): column %q expected length >= %d but got length %d", col.Name(), df.rows, colLen)
 		}
+	}
+	return nil
+}
+
+func NewFrameFromArrowBytes(buf []byte, mem memory.Allocator) (*DataFrame, error) {
+	r := bytes.NewReader(buf)
+	rr, err := ipc.NewFileReader(r, ipc.WithAllocator(mem)) // TODO(twg) need to confirm allocator is required in this instance
+	if err != nil {
+		return nil, err
+	}
+	defer rr.Close()
+	records := make([]arrow.Record, rr.NumRecords(), rr.NumRecords())
+	i := 0
+	for {
+		rec, err := rr.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return nil, err
+		}
+		records[i] = rec
+		i++
+	}
+	records = records[:i]
+	table := array.NewTableFromRecords(rr.Schema(), records)
+	return NewDataFrameFromTable(mem, table)
+}
+
+func (df *DataFrame) ToBytes() ([]byte, error) {
+	buf := filebuffer.New(nil)
+	writer, err := ipc.NewFileWriter(buf, ipc.WithAllocator(df.mem), ipc.WithSchema(df.schema))
+	if err != nil {
+		return nil, err
+	}
+	chunkSize := int64(0)
+	table := NewTableFacade(df)
+	tr := array.NewTableReader(table, chunkSize)
+	defer tr.Release()
+	for tr.Next() {
+		arec := tr.Record()
+		err = writer.Write(arec)
+		if err != nil {
+			return nil, err
+		}
+	}
+	err = writer.Close()
+	return buf.Bytes(), err
+}
+
+func (df *DataFrame) ToParquet(w io.Writer, chunkSize int64) error {
+	props := parquet.NewWriterProperties(parquet.WithDictionaryDefault(false))
+	arrProps := pqarrow.DefaultWriterProps()
+	err := pqarrow.WriteTable(NewTableFacade(df), w, chunkSize, props, arrProps)
+	if err != nil {
+		return err
 	}
 	return nil
 }

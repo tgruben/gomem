@@ -8,6 +8,7 @@ import (
 type ChunkResolver struct {
 	offsets     []int
 	cachedChunk int
+	NumRows     int
 }
 
 func NewChunkResolver(chunks *arrow.Column) ChunkResolver {
@@ -18,7 +19,7 @@ func NewChunkResolver(chunks *arrow.Column) ChunkResolver {
 		offset += chunk.Len()
 		offsets[i+1] = offset
 	}
-	return ChunkResolver{offsets: offsets}
+	return ChunkResolver{offsets: offsets, NumRows: offset}
 }
 
 func (cr *ChunkResolver) Resolve(idx int) (int, int) {

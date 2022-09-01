@@ -16,4 +16,7 @@ module github.com/gomem/gomem
 
 go 1.14
 
-require github.com/apache/arrow/go/v10 v10.0.0-20220824165920-25a273413539
+require (
+	github.com/apache/arrow/go/v10 v10.0.0-20220824165920-25a273413539
+	github.com/mattetti/filebuffer v1.0.1 // indirect
+)

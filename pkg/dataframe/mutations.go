@@ -67,11 +67,9 @@ func (m *Mutator) Slice(beg, end int64) MutationFunc {
 		dfCols := df.Columns()
 
 		cols := make([]arrow.Column, len(dfCols))
-		/*
-			for i, col := range dfCols {
-				cols[i] = *col.NewSlice(beg, end)
-			}
-		*/
+		for i, col := range dfCols {
+			cols[i] = *array.NewColumnSlice(&col, beg, end)
+		}
 
 		defer func() {
 			for i := range cols {
