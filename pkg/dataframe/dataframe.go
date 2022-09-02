@@ -26,6 +26,7 @@ import (
 
 	// import "github.com/apache/arrow/go/v10/arrow"
 
+	"github.com/glycerine/vprint"
 	"github.com/mattetti/filebuffer"
 
 	"github.com/apache/arrow/go/v10/arrow"
@@ -644,15 +645,17 @@ func columnLen(col arrow.Column) int64 {
 }
 
 type Computation struct {
-	Int   []int64   "json:omitempty"
-	Float []float64 "json:omitempty"
+	Int   []int64   "json:int,omitempty"
+	Float []float64 "json:float,omitempty"
 }
 
 func (df *DataFrame) MarshalJSON() ([]byte, error) {
+	vprint.VV("Marshall")
 	column := df.ColumnAt(0)
 	resolver := NewChunkResolver(column)
 
-	var results map[string]*Computation
+	vprint.VV("CreateMap")
+	results := make(map[string]*Computation)
 
 	for n := resolver.NumRows - 1; n >= 0; n-- {
 
@@ -661,6 +664,7 @@ func (df *DataFrame) MarshalJSON() ([]byte, error) {
 		for _, col := range df.Columns() {
 			resCol, ok := results[col.Name()]
 			if !ok {
+				// resCol = &Computation{Int: make([]int64, 0), Float: make([]float64, 0)}
 				resCol = &Computation{}
 			}
 			switch col.DataType().(type) {
@@ -674,6 +678,7 @@ func (df *DataFrame) MarshalJSON() ([]byte, error) {
 				v := col.Data().Chunk(c).(*array.Float64).Float64Values()
 				resCol.Float = append(resCol.Float, v[i])
 			}
+			vprint.VV("store map %v %v", results, resCol)
 			results[col.Name()] = resCol
 		}
 	}
