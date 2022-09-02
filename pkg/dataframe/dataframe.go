@@ -645,8 +645,8 @@ func columnLen(col arrow.Column) int64 {
 }
 
 type Computation struct {
-	Int   []int64   "json:int,omitempty"
-	Float []float64 "json:float,omitempty"
+	Int   []int64   `json:"int,omitempty"`
+	Float []float64 `json:"float,omitempty"`
 }
 
 func (df *DataFrame) MarshalJSON() ([]byte, error) {
