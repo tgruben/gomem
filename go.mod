@@ -18,5 +18,6 @@ go 1.14
 
 require (
 	github.com/apache/arrow/go/v10 v10.0.0-20220824165920-25a273413539
+	github.com/glycerine/vprint v0.0.0-20200730000117-76cea49a68ea // indirect
 	github.com/mattetti/filebuffer v1.0.1 // indirect
 )

@@ -16,6 +16,7 @@ package dataframe
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ import (
 	"sync/atomic"
 
 	// import "github.com/apache/arrow/go/v10/arrow"
+
 	"github.com/mattetti/filebuffer"
 
 	"github.com/apache/arrow/go/v10/arrow"
@@ -639,4 +641,41 @@ func columnLen(col arrow.Column) int64 {
 		length += int64(chunk.Len())
 	}
 	return length
+}
+
+type Computation struct {
+	Int   []int64   "json:omitempty"
+	Float []float64 "json:omitempty"
+}
+
+func (df *DataFrame) MarshalJSON() ([]byte, error) {
+	column := df.ColumnAt(0)
+	resolver := NewChunkResolver(column)
+
+	var results map[string]*Computation
+
+	for n := resolver.NumRows - 1; n >= 0; n-- {
+
+		c, i := resolver.Resolve(n)
+		fmt.Printf("%d ", n)
+		for _, col := range df.Columns() {
+			resCol, ok := results[col.Name()]
+			if !ok {
+				resCol = &Computation{}
+			}
+			switch col.DataType().(type) {
+			case *arrow.Int32Type:
+				v := col.Data().Chunk(c).(*array.Int32).Int32Values()
+				resCol.Int = append(resCol.Int, int64(v[i]))
+			case *arrow.Int64Type:
+				v := col.Data().Chunk(c).(*array.Int64).Int64Values()
+				resCol.Int = append(resCol.Int, v[i])
+			case *arrow.Float64Type:
+				v := col.Data().Chunk(c).(*array.Float64).Float64Values()
+				resCol.Float = append(resCol.Float, v[i])
+			}
+			results[col.Name()] = resCol
+		}
+	}
+	return json.Marshal(results)
 }
