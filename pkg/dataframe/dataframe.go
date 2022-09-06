@@ -643,6 +643,7 @@ func columnLen(col arrow.Column) int64 {
 	return length
 }
 
+// added for json marshalling anotation
 type Computation struct {
 	Int   []int64   `json:"int,omitempty"`
 	Float []float64 `json:"float,omitempty"`
