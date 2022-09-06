@@ -26,7 +26,6 @@ import (
 
 	// import "github.com/apache/arrow/go/v10/arrow"
 
-	"github.com/glycerine/vprint"
 	"github.com/mattetti/filebuffer"
 
 	"github.com/apache/arrow/go/v10/arrow"
@@ -650,17 +649,14 @@ type Computation struct {
 }
 
 func (df *DataFrame) MarshalJSON() ([]byte, error) {
-	vprint.VV("Marshall")
 	column := df.ColumnAt(0)
 	resolver := NewChunkResolver(column)
 
-	vprint.VV("CreateMap")
 	results := make(map[string]*Computation)
 
 	for n := resolver.NumRows - 1; n >= 0; n-- {
 
 		c, i := resolver.Resolve(n)
-		fmt.Printf("%d ", n)
 		for _, col := range df.Columns() {
 			resCol, ok := results[col.Name()]
 			if !ok {
@@ -678,7 +674,6 @@ func (df *DataFrame) MarshalJSON() ([]byte, error) {
 				v := col.Data().Chunk(c).(*array.Float64).Float64Values()
 				resCol.Float = append(resCol.Float, v[i])
 			}
-			vprint.VV("store map %v %v", results, resCol)
 			results[col.Name()] = resCol
 		}
 	}
