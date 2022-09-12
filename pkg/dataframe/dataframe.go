@@ -548,6 +548,7 @@ func NewFrameFromArrowBytes(buf []byte, mem memory.Allocator) (*DataFrame, error
 			return nil, err
 		}
 		records[i] = rec
+		rec.Retain()
 		i++
 	}
 	records = records[:i]
@@ -573,6 +574,7 @@ func (df *DataFrame) ToBytes() ([]byte, error) {
 		}
 	}
 	err = writer.Close()
+	buf.Seek(0, io.SeekStart)
 	return buf.Bytes(), err
 }
 
