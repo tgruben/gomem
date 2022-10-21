@@ -1,8 +1,14 @@
 package dataframe
 
 import (
+	"math/bits"
+
 	"github.com/apache/arrow/go/v10/arrow"
 )
+
+type Resolver interface {
+	Resolve(idx int) (int, int)
+}
 
 // returns
 type ChunkResolver struct {
@@ -49,4 +55,32 @@ func (cr *ChunkResolver) Bisect(idx int) int {
 		}
 	}
 	return lo
+}
+
+type IndexResolver struct {
+	index      []uint32
+	mask       uint32
+	shardwidth uint32
+}
+
+// invariant this can never be bigger than shardwidth
+func NewIndexResolver(size int, mask uint32) *IndexResolver {
+	ir := &IndexResolver{}
+	ir.index = make([]uint32, size, size)
+	ir.mask = mask
+	ir.shardwidth = uint32(bits.OnesCount64(uint64(mask)))
+}
+
+func (ir *IndexResolver) Resolve(idx int) (int, int) {
+	x := ir.index[idx]
+	return int(x >> ir.shardwidth), int(x & ir.mask)
+}
+
+func (ir *IndexResolver) NumRows() int {
+	return len(ir.index)
+}
+
+func (ir *IndexResolver) Set(i int, c int, offset int) {
+	x := uint32((c << ir.shardwidth) | offset)
+	ir.index[i] = x
 }
