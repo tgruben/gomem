@@ -8,13 +8,14 @@ import (
 
 type Resolver interface {
 	Resolve(idx int) (int, int)
+	NumRows() int
 }
 
 // returns
 type ChunkResolver struct {
 	offsets     []int
 	cachedChunk int
-	NumRows     int
+	numRows     int
 }
 
 func NewChunkResolver(chunks *arrow.Column) ChunkResolver {
@@ -25,7 +26,11 @@ func NewChunkResolver(chunks *arrow.Column) ChunkResolver {
 		offset += chunk.Len()
 		offsets[i+1] = offset
 	}
-	return ChunkResolver{offsets: offsets, NumRows: offset}
+	return ChunkResolver{offsets: offsets, numRows: offset}
+}
+
+func (cr *ChunkResolver) NumRows() int {
+	return cr.numRows
 }
 
 func (cr *ChunkResolver) Resolve(idx int) (int, int) {
@@ -69,6 +74,7 @@ func NewIndexResolver(size int, mask uint32) *IndexResolver {
 	ir.index = make([]uint32, size, size)
 	ir.mask = mask
 	ir.shardwidth = uint32(bits.OnesCount64(uint64(mask)))
+	return ir
 }
 
 func (ir *IndexResolver) Resolve(idx int) (int, int) {

@@ -657,7 +657,7 @@ func (df *DataFrame) MarshalJSON() ([]byte, error) {
 
 	results := make(map[string]*Computation)
 
-	for n := resolver.NumRows - 1; n >= 0; n-- {
+	for n := resolver.NumRows() - 1; n >= 0; n-- {
 
 		c, i := resolver.Resolve(n)
 		for _, col := range df.Columns() {
@@ -739,7 +739,7 @@ func (df *DataFrame) Dump() {
 	column := df.ColumnAt(0)
 	resolver := NewChunkResolver(column)
 
-	for n := resolver.NumRows - 1; n >= 0; n-- {
+	for n := resolver.NumRows() - 1; n >= 0; n-- {
 		c, i := resolver.Resolve(n)
 		fmt.Printf("%d ", n)
 		for _, col := range df.Columns() {
